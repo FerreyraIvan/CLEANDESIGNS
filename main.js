@@ -111,11 +111,26 @@ function addEvents(){
             this.value = Math.floor(this.value)
             update()
         })
+        
     })
     /* add products */
     let addCartBtns = document.querySelectorAll('.add-cart')
     addCartBtns.forEach((btn)=>{
         btn.addEventListener('click',  AddingProducts)
+    })
+
+    // BUY ORDER
+    const buyBtn = document.querySelector('.btn-buy')
+    buyBtn.addEventListener('click',()=>{
+        if(itemsAdded.length <= 0){
+            alert("You need to add products to the cart")
+            return
+        }
+        const cartContent = cart.querySelector('.cart-content')
+        cartContent.innerHTML = ''
+        itemsAdded = []
+        alert(" Your Order has been placed succesfully")
+        update()
     })
 
 
@@ -124,8 +139,12 @@ function addEvents(){
 //remove items
 function handle_removeCartItem(){
     this.parentElement.remove()
+    itemsAdded = itemsAdded.filter(
+        (el) => el.title != 
+        this.parentElement.querySelector('.cart-product-title').innerHTML)
     update()
 }
+
 
 
 //quantity changes
@@ -137,21 +156,23 @@ function handle_removeCartItem(){
 
 function updatetotal(){
     let cartBoxes = document.querySelectorAll('.cart-box');
-    const totalElement = cart.querySelector('.total')
+    let totalElement = cart.querySelector('.total')
     let total = 0;
     
     cartBoxes.forEach((cartBox)=>{
         let priceElement = cartBox.querySelector('.cart-price')
-      let price = parseFloat(priceElement.innerHTML.replace('$', ''))
-      let quantity = cartBox.querySelector('.cart-quantity').value;
-      total = price * quantity
-      
+        let price = parseFloat(priceElement.innerHTML.replace('$', ''))
+        let quantity = cartBox.querySelector('.cart-quantity').value;
+        total += price * quantity
+        
     })
+   
     total = total.toFixed(2)
     totalElement.innerHTML = "$" + total
     
-    
+
 } 
+let itemsAdded =[]
 
 function AddingProducts(){
     let product = this.parentElement;
@@ -164,12 +185,23 @@ function AddingProducts(){
         price,
         imgSrc,
     }
+
+    // IF ALREADY EXIST IN THE CART
+    if(itemsAdded.find((el)=> el.title == newToAdd.title)){
+        alert("This Item is Already in the CART")
+        return
+        
+    } else{
+        itemsAdded.push(newToAdd)
+    }
+    
     let cartBoxElement = cartBoxComponent(title,price,imgSrc);
     let newNode = document.createElement('div')
     newNode.innerHTML = cartBoxElement;
     const cartContent = cart.querySelector('.cart-content')
     cartContent.appendChild(newNode)
-    alert('product added')
+    
+    update()
 }
 function cartBoxComponent (title,price,imgSrc){ 
     return  `
@@ -178,7 +210,7 @@ function cartBoxComponent (title,price,imgSrc){
                                 class="cart-img">
                             <div class="detail-box">
                                 <h2 class="cart-product-title">${title}</h2>
-                                <span class="cart-price">$${price}</span>
+                                <span class="cart-price">${price}</span>
                                 <input type="number" value="1" class="cart-quantity">
                             </div>
                             <i class="bx bxs-trash-alt cart-remove"></i>
